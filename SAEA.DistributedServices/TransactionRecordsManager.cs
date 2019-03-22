@@ -278,6 +278,7 @@ namespace SAEA.DistributedServices
                 {
                     var json = SerializeHelper.Serialize(transactionRecords);
                     FileHelper.WriteString(_filePath, json);
+                    result = true;
                 }
             }
             catch (Exception ex)

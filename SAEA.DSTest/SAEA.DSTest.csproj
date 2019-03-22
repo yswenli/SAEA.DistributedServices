@@ -39,8 +39,8 @@
     <Reference Include="SAEA.Common, Version=4.3.1.2, Culture=neutral, PublicKeyToken=01a82380791791ab, processorArchitecture=MSIL">
       <HintPath>..\packages\SAEA.Common.4.3.1.2\lib\netstandard2.0\SAEA.Common.dll</HintPath>
     </Reference>
-    <Reference Include="SAEA.RPC, Version=4.3.1.5, Culture=neutral, PublicKeyToken=01a82380791791ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\SAEA.RPC.4.3.1.5\lib\netstandard2.0\SAEA.RPC.dll</HintPath>
+    <Reference Include="SAEA.RPC, Version=4.3.1.6, Culture=neutral, PublicKeyToken=01a82380791791ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\SAEA.RPC.4.3.1.6\lib\netstandard2.0\SAEA.RPC.dll</HintPath>
     </Reference>
     <Reference Include="SAEA.Sockets, Version=4.3.1.2, Culture=neutral, PublicKeyToken=01a82380791791ab, processorArchitecture=MSIL">
       <HintPath>..\packages\SAEA.Sockets.4.3.1.2\lib\netstandard2.0\SAEA.Sockets.dll</HintPath>

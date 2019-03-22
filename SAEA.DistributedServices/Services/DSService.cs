@@ -17,9 +17,6 @@
 *****************************************************************************/
 using SAEA.DSModel;
 using SAEA.RPC.Common;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SAEA.DistributedServices.Services
 {
@@ -38,6 +35,10 @@ namespace SAEA.DistributedServices.Services
             if (Locker.Lock(transaction.ID))
             {
                 TransactionRecordsManager.Set(transaction);
+
+                Locker.UnLock(transaction.ID);
+
+                return true;
             }
 
             return false;

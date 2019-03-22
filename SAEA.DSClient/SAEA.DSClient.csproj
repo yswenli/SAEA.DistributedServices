@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="SAEA.Common" Version="4.3.1.2" />
-    <PackageReference Include="SAEA.RPC" Version="4.3.1.5" />
+    <PackageReference Include="SAEA.RPC" Version="4.3.1.6" />
   </ItemGroup>
 
 </Project>
