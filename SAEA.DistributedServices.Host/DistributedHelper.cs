@@ -28,7 +28,7 @@ namespace SAEA.DistributedServices.Host
         public static void TansactionServiceInit()
         {
             //开发时，用于saea.rpc 客户端代码生成
-            //GenerateCodeHelper.GenerateCode();
+            GenerateCodeHelper.GenerateCode();
 
             var config = DSConfigBuilder.Read();
 

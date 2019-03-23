@@ -4,14 +4,13 @@
 *******/
 
 using SAEA.Common;
-using SAEA.DSClient.Consumer.Model;
 using SAEA.DSClient.Consumer.Service;
 using SAEA.RPC.Consumer;
 using System;
 
 namespace SAEA.DSClient.Consumer
 {
-    public class RPCServiceProxy
+    public class RPCServiceProxy : IDisposable
     {
         public event ExceptionCollector.OnErrHander OnErr;
 
@@ -27,12 +26,25 @@ namespace SAEA.DSClient.Consumer
         }
         private void ExceptionCollector_OnErr(string name, Exception ex)
         {
-            OnErr(name, ex);
+            OnErr?.Invoke(name, ex);
         }
         DSService _DS;
         public DSService DSService
         {
             get { return _DS; }
+        }
+
+        public bool IsConnected
+        {
+            get
+            {
+                return _serviceConsumer.IsConnected;
+            }
+        }
+
+        public void Dispose()
+        {
+            _serviceConsumer.Dispose();
         }
     }
 }
@@ -50,40 +62,14 @@ namespace SAEA.DSClient.Consumer.Service
         {
             return _serviceConsumer.RemoteCall<Boolean>("DSService", "IsMaster", null);
         }
-        public Boolean RegistTransaction(Transaction transaction)
+        public Boolean RegistTransaction(SAEA.DSModel.Transaction transaction)
         {
             return _serviceConsumer.RemoteCall<Boolean>("DSService", "RegistTransaction", transaction);
         }
-    }
-}
 
-
-namespace SAEA.DSClient.Consumer.Model
-{
-    public class Transaction
-    {
-        public String ID
+        public bool Commit(SAEA.DSModel.Transaction transaction)
         {
-            get; set;
+            return _serviceConsumer.RemoteCall<Boolean>("DSService", "Commit", transaction);
         }
-        public TransactionStatus TransactionStatus
-        {
-            get; set;
-        }
-        public DateTime Created
-        {
-            get; set;
-        }
-    }
-}
-
-namespace SAEA.DSClient.Consumer.Model
-{
-    public enum TransactionStatus : Int32
-    {
-        None = 0,
-        Try = 1,
-        Confirm = 2,
-        Cancel = 3,
     }
 }

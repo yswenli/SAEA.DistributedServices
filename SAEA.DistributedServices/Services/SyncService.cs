@@ -15,41 +15,16 @@
 *版 本 号： V1.0.0.0
 *描    述：
 *****************************************************************************/
-using SAEA.DSModel;
 using SAEA.RPC.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace SAEA.DistributedServices.Services
 {
     [RPCService]
     public class SyncService
     {
-        public bool Connect()
+        public bool HeartBean()
         {
             return true;
-        }
-
-        public List<TransactionRecord> Sync()
-        {
-            return TransactionRecordsManager.TransactionRecords;
-        }
-
-        public List<TransactionOpt> Changed()
-        {
-            var list = TransactionRecordsManager.ChangedList;
-
-            if (list == null || !list.Any())
-            {
-                Thread.Sleep(60 * 1000);
-                return null;
-            }
-
-            TransactionRecordsManager.DelChangedList(list);
-            return list;
         }
     }
 }

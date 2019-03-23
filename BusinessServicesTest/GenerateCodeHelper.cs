@@ -17,16 +17,16 @@
 *****************************************************************************/
 using SAEA.Common;
 
-namespace SAEA.DistributedServices
+namespace BusinessServicesTest
 {
     /// <summary>
     /// 开发时，用于saea.rpc 客户端代码生成
     /// </summary>
     public static class GenerateCodeHelper
     {
-        public static void GenerateCode(string nameSpace= "SAEA.DSClient")
+        public static void GenerateCode(string nameSpace= "SAEA.DSTest")
         {
-            RPC.Generater.CodeGnerater.Generate(PathHelper.GetCurrentPath(), nameSpace);
+            SAEA.RPC.Generater.CodeGnerater.Generate(PathHelper.GetCurrentPath(), nameSpace);
         }
     }
 }

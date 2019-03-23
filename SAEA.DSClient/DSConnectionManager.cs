@@ -22,40 +22,35 @@ using System.Net.Sockets;
 
 namespace SAEA.DSClient
 {
-    static class DSConnectionManager
+    class DSConnectionManager
     {
-        static object _locker = new object();
+        RPCServiceProxy _rpcServiceProxy = null;
 
-        static RPCServiceProxy _rpcServiceProxy = null;
-
-        public static void Init(string rpcUrl)
+        public DSConnectionManager(string rpcUrl)
         {
-            lock (_locker)
-            {
-                var rpcUrls = rpcUrl.Split(",", StringSplitOptions.RemoveEmptyEntries);
+            var rpcUrls = rpcUrl.Split(",", StringSplitOptions.RemoveEmptyEntries);
 
-                if (_rpcServiceProxy == null)
+            if (_rpcServiceProxy == null)
+            {
+                foreach (var item in rpcUrls)
                 {
-                    foreach (var item in rpcUrls)
+                    try
                     {
-                        try
+                        _rpcServiceProxy = new RPCServiceProxy(item);
+                        _rpcServiceProxy.OnErr += _rpcServiceProxy_OnErr;
+                        if (_rpcServiceProxy.DSService.IsMaster())
                         {
-                            _rpcServiceProxy = new RPCServiceProxy(item);
-                            _rpcServiceProxy.OnErr += _rpcServiceProxy_OnErr;
-                            if (_rpcServiceProxy.DSService.IsMaster())
-                            {
-                                break;
-                            }
+                            break;
                         }
-                        catch (SocketException sex)
-                        {
-                            LogHelper.Info($"{item} 连接失败！");
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.Error("连接到远程服务器失败", ex);
-                            throw ex;
-                        }
+                    }
+                    catch (SocketException sex)
+                    {
+                        LogHelper.Info($"{item} 连接失败！");
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.Error("连接到远程服务器失败", ex);
+                        throw ex;
                     }
                 }
             }
@@ -66,19 +61,22 @@ namespace SAEA.DSClient
             LogHelper.Error("DSConnectionManager.Init._rpcServiceProxy_OnErr", ex);
         }
 
-        public static bool Try(string id)
+        public bool Regist(string id, string location)
         {
-            return _rpcServiceProxy.DSService.RegistTransaction(new Consumer.Model.Transaction() { ID = id, TransactionStatus = Consumer.Model.TransactionStatus.Try });
+            return _rpcServiceProxy.DSService.RegistTransaction(new SAEA.DSModel.Transaction() { ID = id, Location = location, TransactionStatus = SAEA.DSModel.TransactionStatus.Try });
         }
 
-        public static bool Confirm(string id)
+        public bool Commit(string id, string location)
         {
-            return _rpcServiceProxy.DSService.RegistTransaction(new Consumer.Model.Transaction() { ID = id, TransactionStatus = Consumer.Model.TransactionStatus.Confirm });
+            return _rpcServiceProxy.DSService.Commit(new SAEA.DSModel.Transaction() { ID = id, Location = location, TransactionStatus = SAEA.DSModel.TransactionStatus.Confirm });
         }
 
-        public static bool Cancel(string id)
+        public void Clear()
         {
-            return _rpcServiceProxy.DSService.RegistTransaction(new Consumer.Model.Transaction() { ID = id, TransactionStatus = Consumer.Model.TransactionStatus.Cancel });
+            if (_rpcServiceProxy != null && _rpcServiceProxy.IsConnected)
+            {
+                _rpcServiceProxy.Dispose();
+            }
         }
     }
 }

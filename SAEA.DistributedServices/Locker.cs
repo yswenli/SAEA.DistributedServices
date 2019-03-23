@@ -37,24 +37,23 @@ namespace SAEA.DistributedServices
         {
             lock (_locker)
             {
-                if (!_IDs.Contains(key))
+                if (SetIfNotExsits(key))
                 {
-                    _IDs.Add(key);
-
                     return true;
                 }
                 else
                 {
                     Stopwatch stopwatch = new Stopwatch();
                     stopwatch.Start();
-                    while (_IDs.Contains(key))
+                    while (!SetIfNotExsits(key))
                     {
-                        if(stopwatch.ElapsedMilliseconds>= timeOut)
+                        if (stopwatch.ElapsedMilliseconds >= timeOut)
                         {
                             stopwatch.Stop();
+                            UnLock(key);
                             return false;
                         }
-                        Thread.Sleep(10);
+                        Thread.Sleep(1);
                     }
                     return true;
                 }
@@ -68,6 +67,17 @@ namespace SAEA.DistributedServices
         public static void UnLock(string key)
         {
             _IDs.Remove(key);
+        }
+
+
+        static bool SetIfNotExsits(string key)
+        {
+            if (!_IDs.Contains(key))
+            {
+                _IDs.Add(key);
+                return true;
+            }
+            return false;
         }
     }
 }

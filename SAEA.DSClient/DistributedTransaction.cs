@@ -15,7 +15,9 @@
 *版 本 号： V1.0.0.0
 *描    述：
 *****************************************************************************/
+using SAEA.DSModel;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace SAEA.DSClient
@@ -25,9 +27,17 @@ namespace SAEA.DSClient
     /// </summary>
     public class DistributedTransaction : IDisposable
     {
-        string _id = string.Empty;
+        string _id = Guid.NewGuid().ToString("N");
 
-        public DistributedTransaction(string rpcUrl)
+        string _location = string.Empty;
+
+        bool hasTransaction = false;
+
+        List<ParticipantInfo> _participantInfos = new List<ParticipantInfo>();
+
+        DSConnectionManager DSConnectionManager;
+
+        public DistributedTransaction(string rpcUrlStr)
         {
             var st1 = new StackTrace(1, true);
 
@@ -35,40 +45,68 @@ namespace SAEA.DSClient
 
             var className = method.DeclaringType.FullName;
 
-            _id = $"{className}_{method.Name}";
+            DSConnectionManager = new DSConnectionManager(rpcUrlStr);
 
-            DSConnectionManager.Init(rpcUrl);
+            _location = $"{className}_{method.Name}";
+
         }
 
-        public void Commit(Func<bool> tryFunc, Func<bool> confirmFunc, Func<bool> cancelFunc = null)
+        public bool Regist(List<ParticipantInfo> participantInfos)
         {
-            if (string.IsNullOrWhiteSpace(_id)) throw new Exception("当前事务已被释放!");
-
             var result = false;
 
-            if (DSConnectionManager.Try(_id))
+            var id = Guid.NewGuid().ToString("N");
+
+
+            if (DSConnectionManager.Regist(_id, _location))
             {
-                result = tryFunc.Invoke();
+                _participantInfos = participantInfos;
+
+                foreach (var item in _participantInfos)
+                {
+                    item.CanConfirm = (bool)item.Participant.GetType().GetMethod(item.Method).Invoke(item.Participant, item.Args);
+                }
+
+                result = hasTransaction = true;
             }
 
-            if (result)
+            return result;
+        }
+
+        public void Commit()
+        {
+            if (hasTransaction)
             {
-                if (confirmFunc.Invoke())
+                try
                 {
-                    if (!DSConnectionManager.Confirm(_id))
+                    foreach (var item in _participantInfos)
                     {
-                        if (cancelFunc != null && cancelFunc.Invoke())
+                        if (item.CanConfirm)
                         {
-                            DSConnectionManager.Cancel(_id);
+                            var c = (bool)item.Participant.GetType().GetMethod(item.Method.Substring(0, item.Method.Length - 3) + "Confirm").Invoke(item.Participant, item.Args);
+                            if (!c)
+                            {
+                                item.Participant.GetType().GetMethod(item.Method.Substring(0, item.Method.Length - 3) + "Cacnel").Invoke(item.Participant, item.Args);
+                            }
                         }
                     }
                 }
+                catch { }
+
+                try
+                {
+                    DSConnectionManager.Commit(_id, _location);
+                }
+                catch { }
             }
+
         }
 
         public void Dispose()
         {
-            _id = string.Empty;
+            Commit();
+            _location = string.Empty;
+            DSConnectionManager.Clear();
         }
     }
 }

@@ -35,6 +35,18 @@ namespace SAEA.DSClient.Consumer
         {
             get { return _Sy; }
         }
+        public bool IsConnected
+        {
+            get
+            {
+                return _serviceConsumer.IsConnected;
+            }
+        }
+
+        public void Dispose()
+        {
+            _serviceConsumer.Dispose();
+        }
     }
 }
 
@@ -47,17 +59,9 @@ namespace SAEA.DSClient.Consumer.Service
         {
             _serviceConsumer = serviceConsumer;
         }
-        public Boolean Connect()
+        public Boolean HeartBean()
         {
-            return _serviceConsumer.RemoteCall<Boolean>("SyncService", "Connect");
-        }
-        public List<TransactionRecord> Sync()
-        {
-            return _serviceConsumer.RemoteCall<List<TransactionRecord>>("SyncService", "Sync");
-        }
-        public List<TransactionOpt> Changed()
-        {
-            return _serviceConsumer.RemoteCall<List<TransactionOpt>>("SyncService", "Changed");
+            return _serviceConsumer.RemoteCall<Boolean>("SyncService", "HeartBean");
         }
     }
 }

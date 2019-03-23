@@ -19,6 +19,7 @@ namespace SAEA.DistributedServices.Host
 
         protected override void OnStart(string[] args)
         {
+            DistributedHelper.TansactionServiceInit();
         }
 
         protected override void OnStop()

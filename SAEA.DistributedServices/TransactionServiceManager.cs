@@ -20,8 +20,6 @@ using SAEA.DSClient.Consumer;
 using SAEA.DSModel;
 using SAEA.RPC.Provider;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SAEA.DistributedServices
 {
@@ -55,55 +53,35 @@ namespace SAEA.DistributedServices
                 _rpcServiceProxy = new RPCServiceProxy(MasterRpcUrl);
                 _rpcServiceProxy.OnErr += _rpcServiceProxy_OnErr;
 
-                if (_rpcServiceProxy.SyncService.Connect())
+                TaskHelper.Start(() =>
                 {
-                    var list = _rpcServiceProxy.SyncService.Sync();
-
-                    if (list != null && list.Any())
-                        TransactionRecordsManager.Init(list.ConvertTo<List<TransactionRecord>>());
-
-                    TaskHelper.Start(() =>
+                    try
                     {
-                        while (_rpcServiceProxy.SyncService.Connect())
+                        while (_rpcServiceProxy.SyncService.HeartBean())
                         {
-                            var result = _rpcServiceProxy.SyncService.Changed();
-
-                            if (result != null && result.Any())
-                            {
-                                foreach (var item in result)
-                                {
-                                    TransactionRecordsManager.Change(item);
-                                }
-                            }
-
                             ThreadHelper.Sleep(1000);
                         }
-                        //若断开，则自动升为主
-                        dsConfig.IsMaster = true;
-                        DSConfigBuilder.Save(dsConfig);
-                    });
-                }
+                    }
+                    catch { }
+                    //若断开，则自动升为主
+                    dsConfig.IsMaster = true;
+                    DSConfigBuilder.Save(dsConfig);
+                });
             }
 
             #endregion
-
-            TransactionRecordsManager.OnChanged += TransactionRecordsManager_OnChanged;
         }
-
-
 
         private static void Sp_OnErr(Exception ex)
         {
+            ConsoleHelper.WriteLine("TransactionManager.Init.Sp_OnErr:" + ex.Message);
             LogHelper.Error("TransactionManager.Init.Sp_OnErr", ex);
         }
+
         private static void _rpcServiceProxy_OnErr(string name, Exception ex)
         {
+            ConsoleHelper.WriteLine("TransactionManager.Init._rpcServiceProxy_OnErr:" + ex.Message);
             LogHelper.Error("TransactionManager.Init._rpcServiceProxy_OnErr", ex);
-        }
-
-        private static void TransactionRecordsManager_OnChanged(TransactionOpt transactionOpt)
-        {
-            TransactionRecordsManager.AddChangedList(transactionOpt);
         }
     }
 }

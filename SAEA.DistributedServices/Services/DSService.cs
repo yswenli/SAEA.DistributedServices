@@ -15,6 +15,7 @@
 *版 本 号： V1.0.0.0
 *描    述：
 *****************************************************************************/
+using SAEA.Common;
 using SAEA.DSModel;
 using SAEA.RPC.Common;
 
@@ -29,19 +30,25 @@ namespace SAEA.DistributedServices.Services
         }
 
 
-
         public bool RegistTransaction(Transaction transaction)
         {
-            if (Locker.Lock(transaction.ID))
+            if (Locker.Lock(transaction.Location))
             {
-                TransactionRecordsManager.Set(transaction);
-
-                Locker.UnLock(transaction.ID);
+                LogHelper.Info(SerializeHelper.Serialize(transaction));
 
                 return true;
             }
 
             return false;
+        }
+
+        public bool Commit(Transaction transaction)
+        {
+            LogHelper.Info(SerializeHelper.Serialize(transaction));
+
+            Locker.UnLock(transaction.Location);
+
+            return true;
         }
     }
 }

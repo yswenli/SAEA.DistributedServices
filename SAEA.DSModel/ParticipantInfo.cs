@@ -3,42 +3,41 @@
 *CLR 版本：4.0.30319.42000
 *机器名称：WENLI-PC
 *命名空间：SAEA.DSModel
-*类 名 称：Transaction
+*类 名 称：ParticipantInfo
 *版 本 号：V1.0.0.0
 *创建人： yswenli
 *电子邮箱：wenguoli_520@qq.com
-*创建时间：2019/3/21 14:38:55
+*创建时间：2019/3/23 14:38:55
 *描述：
 *=====================================================================
-*修改时间：2019/3/21 14:38:55
+*修改时间：2019/3/23 14:38:55
 *修 改 人： yswenli
 *版 本 号： V1.0.0.0
 *描    述：
 *****************************************************************************/
-using System;
 
 namespace SAEA.DSModel
 {
-    public class Transaction
+    public class ParticipantInfo
     {
-        public string ID
+        public object Participant
         {
             get;set;
         }
 
-        public string Location
+        public string Method
         {
             get;set;
         }
 
-        public TransactionStatus TransactionStatus
+        public object[] Args
         {
-            get; set;
-        } = TransactionStatus.None;
+            get;set;
+        }
 
-        public DateTime Created
+        public bool CanConfirm
         {
             get; set;
-        } = DateTime.Now;
+        } = false;
     }
 }
